@@ -1,0 +1,44 @@
+Wersja Gerrita - X.X (np. 2.8)
+
+1. Instalacja Gerrit Plugins API
+Do zbudowania pluginu potrzebny jest jar: gerrit-plugin-api-X.X.jar. 
+Powinien on zostać zainstalowany w lokalnym repo przy instalacji gerrita ze źródeł.
+Mi się to nie udało i pobrałem jara oraz poma ze strony: http://gerritforge.com/snapshot/com/google/gerrit/gerrit-plugin-api/X.X/. Później zainstalowałem go ręcznie w repo: mvn install:install-file -Dfile=<path-to-file> -DpomFile=<path-to-pomfile>.
+
+2. Instalacja Hooks-ITS
+git clone -b stable-X.X https://gerrit.googlesource.com/plugins/hooks-its
+cd hooks-its
+mvn clean install
+
+3. Instalacja Hooks-Jira
+git clone -b stable-X.X https://gerrit.googlesource.com/plugins/hooks-jira
+cd hooks-jira
+mvn clean package
+
+4. Instalacja Gerrita
+Pobrałem wara ze strony: http://gerrit-releases.storage.googleapis.com/index.html.
+Do folderu WEB-INF/plugins wewnątrz wara wrzuciłem zbudowanego wcześniej jara: hooks-jira-X.X.jar.
+java -jar gerrit-X.X.war init -d /path/to/your/gerrit_application_directory
+Pojawi się Instalation Wizard.
+
+5. Konfiguracja
+W pytaniu: Install plugin hooks-jira-X.X version X.X [y/N]? wybrać y. 
+Później jest kofiguracja JIRY.
+W pytaniu Jira issue-Id regex [([A-Z]+-[0-9]+)]: zostawić domyślne.
+W pytaniu Issue-id enforced in commit message: dać MANDATORY - Gerrit będzie wymagał umieszczenia Jira Issue w commit message. (Inne opcje w dokumentacji: w pliku https://gerrit.googlesource.com/plugins/hooks-jira/+/stable-X.X/src/main/resources/Documentation/config.md).
+Trzeba skonfigurować jeszcze kiedy mają być dodawane komentarze do jiry. Wkleiłem to w sekcji [jira] w pliiku gerrit.config:
+	commentOnCommentAdded = false
+	commentOnRefUpdatedGitWeb = false
+	commentOnChangeAbandoned = false
+	commentOnChangeCreated = false
+	commentOnChangeRestored = false
+	commentOnFirstLinkedPatchSetCreated = false
+	commentOnPatchSetCreated = false.
+Komentarze będą dodawane tylko przy mergowaniu.
+Konfiguracja worklow:
+Za pomocą pluginu można reagować na eventy gerritowe zmianą statusu zadania w Jirze.
+Domyślnie konfiguracja jest w pliku issue-state-transition.config (format pliku w dokumentacji).
+Na nasze potrzeby dodałem możliwość różnego konfigurowania tranzycji w zależności od typu zadania.
+W pliku jira-issue-type.properties znajdują się pary typ zadania (w postaci id) - plik, w którym zdefiniowane są tranzycje dla tego typu zadania.
+Jeśli jakiś typ zadania nie jest wyszczególniony w pliku properties to brane są tranzycje z pliku domyślnego.
+Pliki te powinny być w tym samym katalogu i trzymać się standardu pliku issue-state-transition.config.

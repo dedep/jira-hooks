@@ -1,0 +1,8 @@
+.idea
+target/
+.classpath
+.project
+/.settings
+/hooks-its/.settings/org.maven.ide.eclipse.prefs
+/hooks-its/.settings/org.eclipse.m2e.core.prefs
+
